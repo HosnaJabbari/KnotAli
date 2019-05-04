@@ -25,3 +25,8 @@ void addPath(char** output_path, char* input_path);
 bool validateInteractingInputFile(char* path, char* seq1, char* struc1, char* seq2, char* struc2);
 
 bool validateHFOLDInputFile(char* path, char* seq1, char* struc1);
+
+//check MSA input file contains CLUSTAL formatted sequences
+//return true on success, false on fail
+bool validateMSAInputFile(char *path, char *seq, char *struc);
+

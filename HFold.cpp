@@ -59,6 +59,7 @@ int main (int argc, char *argv[])
 	bool sequenceFound = false;
 	bool restrictedFound = false;
 	bool inputPathFound = false;
+	bool msaInputPathFound = false;
 	bool outputPathFound = false;
 	bool errorFound = false;
 	int option;
@@ -79,7 +80,7 @@ int main (int argc, char *argv[])
 		// getopt_long stores the option index here.
                 int option_index = 0;
 
-		option = getopt_long (argc, argv, "s:r:i:o:", long_options, &option_index);
+		option = getopt_long (argc, argv, "s:r:i:o:m:", long_options, &option_index);
 
 		// Detect the end of the options
 		if (option == -1)
@@ -143,6 +144,24 @@ int main (int argc, char *argv[])
 			}
 			outputPathFound = true;
 			break;
+		case 'm':
+			if(restrictedFound || sequenceFound){
+				fprintf(stderr, "Cannot combine -m with -s/-r \n");
+				errorFound = true;
+				break;
+			}
+			strcpy(inputPath,optarg);
+			if(access(inputPath, F_OK) == -1) { //if file does not exist
+				fprintf(stderr, "Input file not exist\n");
+				exit(4);
+			}
+			if (!validateMSAInputFile(inputPath, sequence, restricted)) {
+				errorFound = true;
+				break;
+			}
+			//TODO Add MSA utils to strcopy the consensus sequence and restrictions.
+			msaInputPathFound = true;
+			break;
 		default:
 			errorFound = true;
 			break;
@@ -153,7 +172,7 @@ int main (int argc, char *argv[])
 			exit(1);
 		}
 	}
-
+	//TODO Add validation for msa -m option variable
 	if(!inputPathFound){
 		//if sequence or restricted is missing when input file is not present
 		if(!(sequenceFound && restrictedFound)){
@@ -271,14 +290,15 @@ void printUsage(){
 	printf ("\t\t() restricted base pair\n");
 	printf ("\t\t _ no restriction\n");
 */
-	printf("Usage ./HFold --s <sequence> --r <structure> [--o </path/to/file>]\n");
+    printf("MSA Usage ./KnotAli --m </path/to/file> [--o </path/to/file>]\n\n");
+    printf("Single Sequence Usage ./KnotAli --s <sequence> --r <structure> [--o </path/to/file>]\n");
 	printf("or\n");
-	printf("Usage ./HFold --i </path/to/file> [--o </path/to/file>]\n");
+    printf("Usage ./KnotAli --i </path/to/file> [--o </path/to/file>]\n");
 	printf ("  Restricted structure symbols:\n");
 	printf ("    () restricted base pair\n");
-	printf ("    _ no restriction\n");
+    printf("    _ no restriction\n\n");
 	printf("Example:\n");
-	printf("./HFold --s \"GCAACGAUGACAUACAUCGCUAGUCGACGC\" --r \"(____________________________)\"\n");
-	printf("./HFold --i \"/home/username/Desktop/myinputfile.txt\" --o \"/home/username/Desktop/some_folder/outputfile.txt\"\n");
+    printf("./KnotAli --s \"GCAACGAUGACAUACAUCGCUAGUCGACGC\" --r \"(____________________________)\"\n");
+    printf("./KnotAli --i \"/home/username/Desktop/myinputfile.txt\" --o \"/home/username/Desktop/some_folder/outputfile.txt\"\n");
 	printf("Please read README for more details\n");
 }
